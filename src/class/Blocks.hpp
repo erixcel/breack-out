@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <raylib.h>
 #include <vector>
 #include "../functions/Consts.hpp"
 #include "../functions/Utils.hpp"
@@ -8,32 +8,33 @@
 class Blocks
 {
 public:
-    Blocks(SDL_Renderer *r, int rows, int cols) : renderer(r), rows(rows), cols(cols)
+    Blocks(int rows, int cols) : rows(rows), cols(cols)
     {
         build();
     }
+
     void checkCollisions(Ball *ball)
     {
-        const auto &ballRect = ball->getRect();
-        for (auto it = bricks.begin(); it != bricks.end();)
-        {
-            if (Utils::checkCollision(ballRect, *it))
-            {
-                it = bricks.erase(it);
-                ball->reverseY();
-            }
-            else
+        for (auto it = bricks.begin(); it != bricks.end();){
+            if (CheckCollisionRecs(ball->getRect(), *it)){
+                ball->rebound(*it);
+                *it = bricks.back();
+                bricks.pop_back();
+            } else {
                 ++it;
+            }
         }
+
     }
-    bool isEmpty() const {
+    bool isEmpty() 
+    {
         return bricks.empty();
-    }
+    }    
     void show()
     {
-        SDL_SetRenderDrawColor(renderer, 0, 180, 255, 255);
-        for (const auto &b : bricks)
-            SDL_RenderFillRect(renderer, &b);
+        for (const auto &b : bricks) {
+            DrawRectangleRec(b, SKYBLUE);
+        }            
     }
     void reset()
     {
@@ -41,10 +42,9 @@ public:
     }
 
 private:
-    SDL_Renderer *renderer;
-    std::vector<SDL_Rect> bricks;
+    std::vector<Rectangle> bricks;
     int rows, cols;
-    
+      
     void build()
     {
         bricks.clear();
@@ -53,8 +53,13 @@ private:
         int offsetY = 60;
         for (int row = 0; row < rows; ++row)
             for (int col = 0; col < cols; ++col)
-                bricks.push_back({offsetX + col * (Consts::BLOCK_W + Consts::BLOCK_GAP),
-                                  offsetY + row * (Consts::BLOCK_H + Consts::BLOCK_GAP),
-                                  Consts::BLOCK_W, Consts::BLOCK_H});
+                bricks.push_back(
+                    {
+                        (float)(offsetX + col * (Consts::BLOCK_W + Consts::BLOCK_GAP)),
+                        (float)(offsetY + row * (Consts::BLOCK_H + Consts::BLOCK_GAP)),
+                        (float)Consts::BLOCK_W, 
+                        (float)Consts::BLOCK_H,
+                    }
+                );
     }
 };

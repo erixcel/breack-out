@@ -1,34 +1,64 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <raylib.h>
 #include <string>
 #include "Consts.hpp"
 
 namespace Utils
 {
-    inline bool checkCollision(const SDL_Rect &a, const SDL_Rect &b)
+    
+    inline void showModal(std::string title, std::string message)
     {
-        return (a.x < b.x + b.w &&
-                a.x + a.w > b.x &&
-                a.y < b.y + b.h &&
-                a.y + a.h > b.y);
-    }
-
-    inline void showModal(SDL_Renderer *r,
-                          const std::string &title,
-                          const std::string &message)
-    {
-        std::string js =
-            "alert('" + title + "\\n\\n" + message + "');";
-        emscripten_run_script(js.c_str());
+        // Configuración del modal
+        int modalWidth = 400;
+        int modalHeight = 200;
+        int modalX = (Consts::WINDOW_WIDTH - modalWidth) / 2;
+        int modalY = (Consts::WINDOW_HEIGHT - modalHeight) / 2;
+        
+        // Fondo semi-transparente
+        DrawRectangle(0, 0, Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT, Fade(BLACK, 0.5f));
+        
+        // Fondo del modal
+        DrawRectangle(modalX, modalY, modalWidth, modalHeight, WHITE);
+        DrawRectangleLines(modalX, modalY, modalWidth, modalHeight, BLACK);
+        
+        // Título
+        int titleFontSize = 24;
+        Vector2 titleSize = MeasureTextEx(GetFontDefault(), title.c_str(), titleFontSize, 1);
+        int titleX = modalX + (modalWidth - titleSize.x) / 2;
+        int titleY = modalY + 30;
+        DrawText(title.c_str(), titleX, titleY, titleFontSize, BLACK);
+        
+        // Mensaje
+        int messageFontSize = 18;
+        Vector2 messageSize = MeasureTextEx(GetFontDefault(), message.c_str(), messageFontSize, 1);
+        int messageX = modalX + (modalWidth - messageSize.x) / 2;
+        int messageY = titleY + 50;
+        DrawText(message.c_str(), messageX, messageY, messageFontSize, DARKGRAY);
+        
+        // Botón "Continuar"
+        int buttonWidth = 120;
+        int buttonHeight = 40;
+        int buttonX = modalX + (modalWidth - buttonWidth) / 2;
+        int buttonY = modalY + modalHeight - 60;
+        
+        DrawRectangle(buttonX, buttonY, buttonWidth, buttonHeight, LIGHTGRAY);
+        DrawRectangleLines(buttonX, buttonY, buttonWidth, buttonHeight, BLACK);
+        
+        const char* buttonText = "Continuar";
+        int buttonFontSize = 16;
+        Vector2 buttonTextSize = MeasureTextEx(GetFontDefault(), buttonText, buttonFontSize, 1);
+        int buttonTextX = buttonX + (buttonWidth - buttonTextSize.x) / 2;
+        int buttonTextY = buttonY + (buttonHeight - buttonTextSize.y) / 2;
+        DrawText(buttonText, buttonTextX, buttonTextY, buttonFontSize, BLACK);
     }
     
-    inline void showVictoryModal(SDL_Renderer *r)
+    inline void showVictoryModal()
     {
-        showModal(r, "🏆 ¡VICTORIA! 🏆", "✨ Has destruido todos los bloques. 🎉");
+        showModal("¡VICTORIA!", "Has destruido todos los bloques.");
     }
 
-    inline void showDefeatModal(SDL_Renderer *r)
+    inline void showDefeatModal()
     {
-        showModal(r, "😢 DERROTA 😢", "💔 La bola cayó fuera. Intenta de nuevo. 🔄");
+        showModal("DERROTA", "La bola cayó fuera. Intenta de nuevo.");
     }
 }

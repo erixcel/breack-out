@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <raylib.h>
 #include <emscripten.h>
 #include "src/enum/State.hpp"
 #include "src/functions/Consts.hpp"
@@ -7,8 +7,6 @@
 #include "src/class/Ball.hpp"
 #include "src/class/Blocks.hpp"
 
-SDL_Window* window = nullptr;
-SDL_Renderer* renderer = nullptr;
 Paddle* paddle = nullptr;
 Ball* ball = nullptr;
 Blocks* blocks = nullptr;
@@ -16,13 +14,14 @@ EndState endState = EndState::NONE;
 bool showEndModal = false;
 
 void loop() {
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) if (e.type == SDL_QUIT) { SDL_Quit(); return; }
+    if (WindowShouldClose()) {
+        CloseWindow();
+        return;
+    }
 
     if (!showEndModal) {
-        const Uint8* keys = SDL_GetKeyboardState(nullptr);
         ball->update();
-        paddle->handleInput(keys);
+        paddle->handleInput();
         paddle->checkCollisions(ball);
         blocks->checkCollisions(ball);
 
@@ -34,39 +33,57 @@ void loop() {
             showEndModal = true;
             endState = EndState::DEFEAT;
         }
+    } else {
+        // Detectar clic en el botón "Continuar" del modal
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            Vector2 mousePos = GetMousePosition();
+            int modalWidth = 400;
+            int modalHeight = 200;
+            int modalX = (Consts::WINDOW_WIDTH - modalWidth) / 2;
+            int modalY = (Consts::WINDOW_HEIGHT - modalHeight) / 2;
+            
+            int buttonWidth = 120;
+            int buttonHeight = 40;
+            int buttonX = modalX + (modalWidth - buttonWidth) / 2;
+            int buttonY = modalY + modalHeight - 60;
+            
+            // Verificar si el clic está dentro del botón
+            if (mousePos.x >= buttonX && mousePos.x <= buttonX + buttonWidth &&
+                mousePos.y >= buttonY && mousePos.y <= buttonY + buttonHeight) {
+                // Cerrar modal y reiniciar juego
+                showEndModal = false;
+                ball->reset();
+                paddle->reset();
+                blocks->reset();
+                endState = EndState::NONE;
+            }
+        }
     }
 
-    SDL_SetRenderDrawColor(renderer, 0, 12, 33, 61);
-    SDL_RenderClear(renderer);
+    BeginDrawing();
+    ClearBackground({0, 12, 33, 61});
 
     ball->show();
     blocks->show();
     paddle->show();
 
     if (showEndModal) {
-        ball->reset();
-        paddle->reset();
-        blocks->reset();
-        showEndModal = false;
         if (endState == EndState::VICTORY) {
-            Utils::showVictoryModal(renderer);
+            Utils::showVictoryModal();
         } else {
-            Utils::showDefeatModal(renderer);
+            Utils::showDefeatModal();
         }
     }
     
-    SDL_RenderPresent(renderer);
+    EndDrawing();
 }
 
 int main() {
-    SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("Minimal Breakout", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                               Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT, 0);
-    renderer = SDL_CreateRenderer(window, -1, 0);
+    InitWindow(Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT, "Minimal Breakout");
 
-    ball = new Ball(renderer);
-    paddle = new Paddle(renderer);
-    blocks = new Blocks(renderer, 5, 10);
+    ball = new Ball();
+    paddle = new Paddle();
+    blocks = new Blocks(5, 10);
     
     ball->reset();
     paddle->reset();
