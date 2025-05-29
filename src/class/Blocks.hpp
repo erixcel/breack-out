@@ -5,32 +5,26 @@
 #include "../functions/Utils.hpp"
 #include "Ball.hpp"
 
-// Forward declaration
-class ItemManager;
-
 class Blocks
 {
 public:
     Blocks(int rows, int cols) : rows(rows), cols(cols)
     {
         build();
-    }    void checkCollisions(Ball *ball, ItemManager* itemManager = nullptr)
+    }
+
+    void checkCollisions(Ball *ball)
     {
         for (auto it = bricks.begin(); it != bricks.end();){
             if (CheckCollisionRecs(ball->getRect(), *it)){
                 ball->rebound(*it);
-                
-                // Crear item si se proporciona un ItemManager
-                if (itemManager) {
-                    itemManager->createItem(it->x, it->y);
-                }
-                
                 *it = bricks.back();
                 bricks.pop_back();
             } else {
                 ++it;
             }
         }
+
     }
     bool isEmpty() 
     {

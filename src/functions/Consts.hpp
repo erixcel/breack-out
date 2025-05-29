@@ -8,11 +8,9 @@ namespace Consts {
     constexpr int PADDLE_SPEED = 12;
 
     constexpr int BALL_SIZE  = 12;
-    constexpr float BALL_SPEED = 6.0f;    constexpr int BLOCK_W = 60;
+    constexpr float BALL_SPEED = 6.0f;
+
+    constexpr int BLOCK_W = 60;
     constexpr int BLOCK_H = 20;
     constexpr int BLOCK_GAP = 4;
-    
-    constexpr int ITEM_SIZE = 16;
-    constexpr float ITEM_FALL_SPEED = 3.0f;
-    constexpr float ITEM_DROP_CHANCE = 0.3f; // 30% de probabilidad
 }

@@ -1,7 +1,14 @@
 {
     "files.associations": {
+        "*.css": "tailwindcss",
+        "*.html": "html",
+        "*.ts": "typescript",
+        "*.tsx": "typescriptreact",
         "**/templates/*.html": "django-html",
         "vector": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "bitset": "cpp",
+        "memory": "cpp",
+        "optional": "cpp"
     }
 }

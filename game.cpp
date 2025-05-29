@@ -1,18 +1,15 @@
 #include <raylib.h>
 #include <emscripten.h>
-#include <vector>
 #include "src/enum/State.hpp"
 #include "src/functions/Consts.hpp"
 #include "src/functions/Utils.hpp"
 #include "src/class/Paddle.hpp"
 #include "src/class/Ball.hpp"
 #include "src/class/Blocks.hpp"
-#include "src/class/ItemManager.hpp"
 
 Paddle* paddle = nullptr;
-std::vector<Ball> balls;
+Ball* ball = nullptr;
 Blocks* blocks = nullptr;
-ItemManager* itemManager = nullptr;
 EndState endState = EndState::NONE;
 bool showEndModal = false;
 
@@ -23,34 +20,16 @@ void loop() {
     }
 
     if (!showEndModal) {
-        // Actualizar todas las pelotas
-        for (auto& ball : balls) {
-            ball.update();
-            paddle->checkCollisions(&ball);
-            blocks->checkCollisions(&ball, itemManager);
-        }
-        
-        // Actualizar items
-        itemManager->update();
-        itemManager->checkPaddleCollisions(paddle, &balls);
-        
+        ball->update();
         paddle->handleInput();
+        paddle->checkCollisions(ball);
+        blocks->checkCollisions(ball);
 
         if (blocks->isEmpty()) {
             showEndModal = true;
             endState = EndState::VICTORY;
         }
-        
-        // Verificar si todas las pelotas están fuera
-        bool allBallsOut = true;
-        for (const auto& ball : balls) {
-            if (!ball.isOut()) {
-                allBallsOut = false;
-                break;
-            }
-        }
-        
-        if (allBallsOut) {
+        if (ball->isOut()) {
             showEndModal = true;
             endState = EndState::DEFEAT;
         }
@@ -68,34 +47,25 @@ void loop() {
             int buttonX = modalX + (modalWidth - buttonWidth) / 2;
             int buttonY = modalY + modalHeight - 60;
             
-            // Verificar si el clic está dentro del botón            if (mousePos.x >= buttonX && mousePos.x <= buttonX + buttonWidth &&
+            // Verificar si el clic está dentro del botón
+            if (mousePos.x >= buttonX && mousePos.x <= buttonX + buttonWidth &&
                 mousePos.y >= buttonY && mousePos.y <= buttonY + buttonHeight) {
                 // Cerrar modal y reiniciar juego
                 showEndModal = false;
-                
-                // Reiniciar con una sola pelota
-                balls.clear();
-                Ball newBall;
-                newBall.reset();
-                balls.push_back(newBall);
-                
+                ball->reset();
                 paddle->reset();
                 blocks->reset();
-                itemManager->reset();
                 endState = EndState::NONE;
             }
         }
-    }    BeginDrawing();
+    }
+
+    BeginDrawing();
     ClearBackground({0, 12, 33, 61});
 
-    // Dibujar todas las pelotas
-    for (auto& ball : balls) {
-        ball.show();
-    }
-    
+    ball->show();
     blocks->show();
     paddle->show();
-    itemManager->show();
 
     if (showEndModal) {
         if (endState == EndState::VICTORY) {
@@ -111,15 +81,11 @@ void loop() {
 int main() {
     InitWindow(Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT, "Minimal Breakout");
 
+    ball = new Ball();
     paddle = new Paddle();
     blocks = new Blocks(5, 10);
-    itemManager = new ItemManager();
     
-    // Inicializar con una pelota
-    Ball initialBall;
-    initialBall.reset();
-    balls.push_back(initialBall);
-    
+    ball->reset();
     paddle->reset();
     blocks->reset();
 

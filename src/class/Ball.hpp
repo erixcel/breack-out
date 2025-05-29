@@ -31,8 +31,7 @@ public:
             reverseX();
         if (rect.y <= 0)
             reverseY();
-    }
-    
+    } 
     void rebound(const Rectangle& otherRect) {
 
         // Calcular centros

@@ -9,7 +9,6 @@ public:
     Paddle() {
         rect.width = Consts::PADDLE_W;
         rect.height = Consts::PADDLE_H;
-        originalWidth = Consts::PADDLE_W;
     }
     void center() {
         rect.x = (Consts::WINDOW_WIDTH  - rect.width) / 2;
@@ -27,30 +26,12 @@ public:
         }
     }
     
-    void expand() {
-        float oldCenterX = rect.x + rect.width / 2;
-        rect.width = originalWidth * 1.5f; // Expandir 50%
-        rect.x = oldCenterX - rect.width / 2; // Mantener centrado
-        
-        // Asegurar que no salga de los límites
-        if (rect.x < 0) rect.x = 0;
-        if (rect.x + rect.width > Consts::WINDOW_WIDTH) rect.x = Consts::WINDOW_WIDTH - rect.width;
-    }
-    
     void show() {
         DrawRectangleRec(rect, WHITE);
     }
-    
     void reset() {
-        rect.width = originalWidth;
         center();
     }
-    
-    Rectangle getRect() const {
-        return rect;
-    }
-    
 private:
     Rectangle rect{};
-    float originalWidth;
 };
