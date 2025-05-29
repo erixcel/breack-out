@@ -1,0 +1,1 @@
+enum class EndState { NONE, VICTORY, DEFEAT };

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "**/templates/*.html": "django-html",
+        "vector": "cpp",
+        "string": "cpp"
+    }
+}
