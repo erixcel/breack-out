@@ -30,7 +30,23 @@ public:
         DrawRectangleRec(rect, WHITE);
     }
     void reset() {
+        defaultSize();
         center();
+    }
+
+    void defaultSize() {
+        rect.width = Consts::PADDLE_W;
+    }
+
+    void increaseWidth() {
+        rect.width += Consts::PADDLE_INCREMENT_POINTS;
+        if (rect.width > Consts::PADDLE_MAX_W) {
+            rect.width = Consts::PADDLE_MAX_W;
+        }
+    }
+    Rectangle &getRect()
+    {
+        return rect;
     }
 private:
     Rectangle rect{};

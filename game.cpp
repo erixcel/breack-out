@@ -6,10 +6,12 @@
 #include "src/class/Paddle.hpp"
 #include "src/class/Ball.hpp"
 #include "src/class/Blocks.hpp"
+#include "src/class/Gifts.hpp"  // Nueva clase Gifts
 
 Paddle* paddle = nullptr;
 Ball* ball = nullptr;
 Blocks* blocks = nullptr;
+Gifts gifts;  // Objeto Gifts en lugar de vector
 EndState endState = EndState::NONE;
 bool showEndModal = false;
 
@@ -23,7 +25,10 @@ void loop() {
         ball->update();
         paddle->handleInput();
         paddle->checkCollisions(ball);
-        blocks->checkCollisions(ball);
+        blocks->checkCollisions(ball, gifts);
+
+        gifts.update();
+        gifts.checkCollisions(paddle);
 
         if (blocks->isEmpty()) {
             showEndModal = true;
@@ -55,6 +60,7 @@ void loop() {
                 ball->reset();
                 paddle->reset();
                 blocks->reset();
+                gifts.reset();  // Reiniciar regalos
                 endState = EndState::NONE;
             }
         }
@@ -66,6 +72,7 @@ void loop() {
     ball->show();
     blocks->show();
     paddle->show();
+    gifts.show();  // Mostrar regalos
 
     if (showEndModal) {
         if (endState == EndState::VICTORY) {
