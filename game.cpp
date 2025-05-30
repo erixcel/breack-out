@@ -55,12 +55,13 @@ void loop() {
             // Verificar si el clic está dentro del botón
             if (mousePos.x >= buttonX && mousePos.x <= buttonX + buttonWidth &&
                 mousePos.y >= buttonY && mousePos.y <= buttonY + buttonHeight) {
+                    
                 // Cerrar modal y reiniciar juego
                 showEndModal = false;
                 ball->reset();
                 paddle->reset();
                 blocks->reset();
-                gifts.reset();  // Reiniciar regalos
+                gifts.reset();
                 endState = EndState::NONE;
             }
         }
