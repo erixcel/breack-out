@@ -5,12 +5,14 @@
 #include <ctime>
 #include "../functions/Consts.hpp"
 #include "../functions/Utils.hpp"
-#include "Ball.hpp"
+#include "../enum/Types.hpp"
+#include "Balls.hpp"
 #include "Gifts.hpp"
 
 struct Block {
     Rectangle rect;
     bool hasGift;
+    GiftType giftType;
 };
 
 class Blocks {
@@ -19,23 +21,28 @@ public:
         build();
     }
 
-    void checkCollisions(Ball* ball, Gifts& gifts) {
-        for (auto it = blocks.begin(); it != blocks.end();) {
-            if (CheckCollisionRecs(ball->getRect(), it->rect)) {
-                ball->rebound(it->rect);
-                
-                if (it->hasGift) {
-                    Vector2 pos = {
-                        it->rect.x + it->rect.width/2 - Consts::GIFT_SIZE/2,
-                        it->rect.y + it->rect.height
-                    };
-                    gifts.add(pos);
+    void checkCollisions(Balls* balls, Gifts* gifts) {
+        for (auto& ball : balls->getBalls()) {
+            if (!ball.active) continue;
+            
+            for (auto it = blocks.begin(); it != blocks.end();) {
+                if (CheckCollisionRecs(ball.rect, it->rect)) {
+                    balls->rebound(it->rect, ball);
+                    
+                    if (it->hasGift) {
+                        Vector2 pos = {
+                            it->rect.x + it->rect.width/2 - Consts::GIFT_SIZE/2,
+                            it->rect.y + it->rect.height
+                        };
+                        gifts->add(pos, it->giftType);
+                    }
+                    
+                    *it = blocks.back();
+                    blocks.pop_back();
+                    break;
+                } else {
+                    ++it;
                 }
-                
-                *it = blocks.back();
-                blocks.pop_back();
-            } else {
-                ++it;
             }
         }
     }
@@ -76,6 +83,15 @@ private:
                 
                 float random_value = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
                 block.hasGift = (random_value < Consts::GIFT_PROBABILITY);
+                
+                // Si tiene regalo, decidir el tipo aleatoriamente
+                if (block.hasGift) {
+                    float gift_type_random = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+                    // 60% probabilidad de regalo dorado (expande paleta), 40% verde (multi-pelota)
+                    block.giftType = (gift_type_random < 0.6f) ? GiftType::PADDLE_EXPAND : GiftType::MULTI_BALL;
+                } else {
+                    block.giftType = GiftType::PADDLE_EXPAND; // Valor por defecto (no se usa si no hay regalo)
+                }
 
                 blocks.push_back(block);
             }

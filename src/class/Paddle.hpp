@@ -2,7 +2,7 @@
 #include <raylib.h>
 #include "../functions/Consts.hpp"
 #include "../functions/Utils.hpp"
-#include "Ball.hpp"
+#include "Balls.hpp"
 
 class Paddle {
 public:
@@ -20,9 +20,12 @@ public:
         if (rect.x < 0) rect.x = 0;
         if (rect.x + rect.width > Consts::WINDOW_WIDTH) rect.x = Consts::WINDOW_WIDTH - rect.width;
     }
-    void checkCollisions(Ball* ball) {
-        if (CheckCollisionRecs(ball->getRect(), rect)) {
-            ball->rebound(rect);
+    void checkCollisions(Balls* ball) {
+        auto& balls = ball->getBalls();
+        for (auto& ballInstance : balls) {
+            if (ballInstance.active && CheckCollisionRecs(ballInstance.rect, rect)) {
+                ball->rebound(rect, ballInstance);
+            }
         }
     }
     

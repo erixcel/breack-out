@@ -4,14 +4,14 @@
 #include "src/functions/Consts.hpp"
 #include "src/functions/Utils.hpp"
 #include "src/class/Paddle.hpp"
-#include "src/class/Ball.hpp"
+#include "src/class/Balls.hpp"
 #include "src/class/Blocks.hpp"
-#include "src/class/Gifts.hpp"  // Nueva clase Gifts
+#include "src/class/Gifts.hpp"
 
 Paddle* paddle = nullptr;
-Ball* ball = nullptr;
+Balls* balls = nullptr;
 Blocks* blocks = nullptr;
-Gifts gifts;  // Objeto Gifts en lugar de vector
+Gifts* gifts = nullptr;
 EndState endState = EndState::NONE;
 bool showEndModal = false;
 
@@ -22,19 +22,18 @@ void loop() {
     }
 
     if (!showEndModal) {
-        ball->update();
+        balls->update();
+        gifts->update();
         paddle->handleInput();
-        paddle->checkCollisions(ball);
-        blocks->checkCollisions(ball, gifts);
-
-        gifts.update();
-        gifts.checkCollisions(paddle);
+        paddle->checkCollisions(balls);
+        blocks->checkCollisions(balls, gifts);
+        gifts->checkCollisions(paddle, balls);
 
         if (blocks->isEmpty()) {
             showEndModal = true;
             endState = EndState::VICTORY;
         }
-        if (ball->isOut()) {
+        if (balls->isOut()) {
             showEndModal = true;
             endState = EndState::DEFEAT;
         }
@@ -58,10 +57,10 @@ void loop() {
                     
                 // Cerrar modal y reiniciar juego
                 showEndModal = false;
-                ball->reset();
+                balls->reset();
                 paddle->reset();
                 blocks->reset();
-                gifts.reset();
+                gifts->reset();
                 endState = EndState::NONE;
             }
         }
@@ -70,10 +69,10 @@ void loop() {
     BeginDrawing();
     ClearBackground({0, 12, 33, 61});
 
-    ball->show();
+    balls->show();
     blocks->show();
     paddle->show();
-    gifts.show();  // Mostrar regalos
+    gifts->show();
 
     if (showEndModal) {
         if (endState == EndState::VICTORY) {
@@ -89,11 +88,11 @@ void loop() {
 int main() {
     InitWindow(Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT, "Minimal Breakout");
 
-    ball = new Ball();
+    balls = new Balls();
     paddle = new Paddle();
     blocks = new Blocks(5, 10);
     
-    ball->reset();
+    balls->reset();
     paddle->reset();
     blocks->reset();
 
