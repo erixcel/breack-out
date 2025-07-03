@@ -91,6 +91,7 @@ int main() {
     balls = new Balls();
     paddle = new Paddle();
     blocks = new Blocks(5, 10);
+    gifts = new Gifts();
     
     balls->reset();
     paddle->reset();

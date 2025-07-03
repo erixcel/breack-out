@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cmath>
+#include <string>
+#include <cstdio>
+#include <emscripten.h>
 #include "../functions/Consts.hpp"
 #include "../enum/Types.hpp"
 #include "Paddle.hpp"
@@ -13,6 +16,24 @@ class Balls;
 
 class Gifts {
 public:
+    Gifts() : texturesLoaded(false) {
+    }
+    
+    ~Gifts() {
+        if (texturesLoaded) {
+            UnloadTexture(giftMultiBallTexture);
+            UnloadTexture(giftPaddleExpandTexture);
+        }
+    }
+    
+    void loadTextures() {
+        if (!texturesLoaded) {
+            giftMultiBallTexture = LoadTexture("sprites/gift_multi_ball.png");
+            giftPaddleExpandTexture = LoadTexture("sprites/gift_paddle_expand.png");
+            texturesLoaded = true;
+        }
+    }
+    
     struct Gift {
         Rectangle rect;
         bool active;
@@ -56,17 +77,17 @@ public:
     }
 
     void addMultipleBalls(Balls* balls, int count) {
-        for (const auto& ball : balls->getBalls()) {
+        std::string debugInfo = "Pelotas agregadas:\\n";
+        int ballsAdded = 0;
+        
+        auto originalBalls = balls->getBalls();
+        
+        for (const auto& ball : originalBalls) {
             if (ball.active) {
                 for (int i = 0; i < count; i++) {
-                    float angleOffset = (i + 1) * 0.3f;
-                    
-                    float newVx = ball.vx + (std::rand() % 3 - 1) * 0.5f;
-                    float newVy = ball.vy + (std::rand() % 3 - 1) * 0.5f;
-                    
-                    if (abs(newVx) < 2.0f) newVx = (newVx >= 0) ? 2.0f : -2.0f;
-                    if (abs(newVy) < 2.0f) newVy = (newVy >= 0) ? 2.0f : -2.0f;
-                    
+                    const float angle = (i + 1) * 0.3f * ((i % 2 == 0) ? 1 : -1);
+                    float newVx = ball.vx * cos(angle) - ball.vy * sin(angle);
+                    float newVy = ball.vx * sin(angle) + ball.vy * cos(angle);
                     balls->addBallAt(ball.rect.x, ball.rect.y, newVx, newVy);
                 }
             }
@@ -76,10 +97,21 @@ public:
 
     
     void show() {
+        if (!texturesLoaded) {
+            loadTextures();
+        }
+        
         for (const auto& gift : gifts) {
             if (gift.active) {
-                Color color = (gift.type == GiftType::PADDLE_EXPAND) ? GOLD : GREEN;
-                DrawRectangleRec(gift.rect, color);
+                Texture2D* textureToUse = &giftPaddleExpandTexture;
+                
+                if (gift.type == GiftType::MULTI_BALL) {
+                    textureToUse = &giftMultiBallTexture;
+                } else if (gift.type == GiftType::PADDLE_EXPAND) {
+                    textureToUse = &giftPaddleExpandTexture;
+                }
+                
+                Utils::DrawTextureScaled(*textureToUse, gift.rect.x, gift.rect.y, (float)Consts::GIFT_SIZE, (float)Consts::GIFT_SIZE, WHITE);
             }
         }
     }
@@ -90,4 +122,9 @@ public:
     
 private:
     std::vector<Gift> gifts;
+    bool texturesLoaded;
+    
+    // Texturas para los regalos
+    Texture2D giftMultiBallTexture;
+    Texture2D giftPaddleExpandTexture;
 };

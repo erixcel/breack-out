@@ -16,7 +16,7 @@ namespace Consts {
     constexpr int BLOCK_H = 20;
     constexpr int BLOCK_GAP = 4;
 
-    constexpr int GIFT_SIZE = 10;
+    constexpr int GIFT_SIZE = 20;
     constexpr int GIFT_SPEED = 4;
     constexpr float GIFT_PROBABILITY = 0.2f;
 }

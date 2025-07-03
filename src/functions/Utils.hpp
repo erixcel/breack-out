@@ -5,6 +5,38 @@
 
 namespace Utils
 {
+    // Método para renderizar textura escalada al tamaño especificado
+    inline void DrawTextureScaled(Texture2D texture, float x, float y, float width, float height, Color tint = WHITE)
+    {
+        Rectangle source = { 0, 0, (float)texture.width, (float)texture.height };
+        Rectangle dest = { x, y, width, height };
+        Vector2 origin = { 0, 0 };
+        
+        DrawTexturePro(texture, source, dest, origin, 0.0f, tint);
+    }
+
+    inline void DrawTextureNineSlice(Texture2D texture, float x, float y, float width, float height, float borderWidth, Color tint = WHITE)
+    {
+        float textureWidth = (float)texture.width;
+        float textureHeight = (float)texture.height;
+        
+        if (width < borderWidth * 2) width = borderWidth * 2;
+        
+        float centerWidth = width - (borderWidth * 2);
+        float centerSourceWidth = textureWidth - (borderWidth * 2);
+        
+        Rectangle sourceLeft = { 0, 0, borderWidth, textureHeight };
+        Rectangle destLeft = { x, y, borderWidth, height };
+        DrawTexturePro(texture, sourceLeft, destLeft, {0, 0}, 0.0f, tint);
+        
+        Rectangle sourceCenter = { borderWidth, 0, centerSourceWidth, textureHeight };
+        Rectangle destCenter = { x + borderWidth, y, centerWidth, height };
+        DrawTexturePro(texture, sourceCenter, destCenter, {0, 0}, 0.0f, tint);
+        
+        Rectangle sourceRight = { textureWidth - borderWidth, 0, borderWidth, textureHeight };
+        Rectangle destRight = { x + width - borderWidth, y, borderWidth, height };
+        DrawTexturePro(texture, sourceRight, destRight, {0, 0}, 0.0f, tint);
+    }
     
     inline void showModal(std::string title, std::string message)
     {

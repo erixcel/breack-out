@@ -17,8 +17,25 @@ struct Block {
 
 class Blocks {
 public:
-    Blocks(int rows, int cols) : rows(rows), cols(cols) {
+    Blocks(int rows, int cols) : rows(rows), cols(cols), texturesLoaded(false) {
         build();
+    }
+    
+    ~Blocks() {
+        if (texturesLoaded) {
+            UnloadTexture(blockTexture);
+            UnloadTexture(blockMultiBallTexture);
+            UnloadTexture(blockPaddleExpandTexture);
+        }
+    }
+    
+    void loadTextures() {
+        if (!texturesLoaded) {
+            blockTexture = LoadTexture("sprites/block.png");
+            blockMultiBallTexture = LoadTexture("sprites/block_multi_ball.png");
+            blockPaddleExpandTexture = LoadTexture("sprites/block_paddle_expand.png");
+            texturesLoaded = true;
+        }
     }
 
     void checkCollisions(Balls* balls, Gifts* gifts) {
@@ -52,8 +69,22 @@ public:
     }
     
     void show() {
-        for (const auto& b : blocks) {
-            DrawRectangleRec(b.rect, b.hasGift ? PURPLE : SKYBLUE);
+        if (!texturesLoaded) {
+            loadTextures();
+        }
+        
+        for (const auto& block : blocks) {
+            Texture2D* textureToUse = &blockTexture;
+            
+            if (block.hasGift) {
+                if (block.giftType == GiftType::MULTI_BALL) {
+                    textureToUse = &blockMultiBallTexture;
+                } else if (block.giftType == GiftType::PADDLE_EXPAND) {
+                    textureToUse = &blockPaddleExpandTexture;
+                }
+            }
+            
+            Utils::DrawTextureScaled(*textureToUse, block.rect.x, block.rect.y, (float)Consts::BLOCK_W, (float)Consts::BLOCK_H, WHITE);
         }
     }
     
@@ -64,6 +95,12 @@ public:
 private:
     std::vector<Block> blocks;
     int rows, cols;
+    bool texturesLoaded;
+    
+    // Texturas para los bloques
+    Texture2D blockTexture;
+    Texture2D blockMultiBallTexture;
+    Texture2D blockPaddleExpandTexture;
       
     void build() {
         blocks.clear();
@@ -84,13 +121,11 @@ private:
                 float random_value = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
                 block.hasGift = (random_value < Consts::GIFT_PROBABILITY);
                 
-                // Si tiene regalo, decidir el tipo aleatoriamente
                 if (block.hasGift) {
                     float gift_type_random = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-                    // 60% probabilidad de regalo dorado (expande paleta), 40% verde (multi-pelota)
-                    block.giftType = (gift_type_random < 0.6f) ? GiftType::PADDLE_EXPAND : GiftType::MULTI_BALL;
+                    block.giftType = (gift_type_random < 0.5f) ? GiftType::PADDLE_EXPAND : GiftType::MULTI_BALL;
                 } else {
-                    block.giftType = GiftType::PADDLE_EXPAND; // Valor por defecto (no se usa si no hay regalo)
+                    block.giftType = GiftType::PADDLE_EXPAND;
                 }
 
                 blocks.push_back(block);

@@ -9,6 +9,20 @@ public:
     Paddle() {
         rect.width = Consts::PADDLE_W;
         rect.height = Consts::PADDLE_H;
+        texturesLoaded = false;
+    }
+    
+    ~Paddle() {
+        if (texturesLoaded) {
+            UnloadTexture(paddleTexture);
+        }
+    }
+    
+    void loadTextures() {
+        if (!texturesLoaded) {
+            paddleTexture = LoadTexture("sprites/paddle.png");
+            texturesLoaded = true;
+        }
     }
     void center() {
         rect.x = (Consts::WINDOW_WIDTH  - rect.width) / 2;
@@ -30,7 +44,10 @@ public:
     }
     
     void show() {
-        DrawRectangleRec(rect, WHITE);
+        if (!texturesLoaded) {
+            loadTextures();
+        }
+        Utils::DrawTextureNineSlice(paddleTexture, rect.x, rect.y, rect.width, rect.height, 20.0f);
     }
     void reset() {
         defaultSize();
@@ -53,4 +70,6 @@ public:
     }
 private:
     Rectangle rect{};
+    bool texturesLoaded;
+    Texture2D paddleTexture;
 };

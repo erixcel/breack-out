@@ -15,9 +15,22 @@ public:
         bool active;
     };
 
-    Balls() {
+    Balls() : texturesLoaded(false) {
         // Initialize with one ball by default
         addBall();
+    }
+    
+    ~Balls() {
+        if (texturesLoaded) {
+            UnloadTexture(ballTexture);
+        }
+    }
+    
+    void loadTextures() {
+        if (!texturesLoaded) {
+            ballTexture = LoadTexture("sprites/ball.png");
+            texturesLoaded = true;
+        }
     }
     
     void addBall() {
@@ -141,9 +154,13 @@ public:
     }
     
     void show() {
+        if (!texturesLoaded) {
+            loadTextures();
+        }
+        
         for (const auto& ball : balls) {
             if (ball.active) {
-                DrawRectangleRec(ball.rect, WHITE);
+                Utils::DrawTextureScaled(ballTexture, ball.rect.x, ball.rect.y, (float)Consts::BALL_SIZE, (float)Consts::BALL_SIZE);
             }
         }
     }
@@ -159,4 +176,6 @@ public:
 
 private:
     std::vector<Ball> balls;
+    bool texturesLoaded;
+    Texture2D ballTexture;
 };
