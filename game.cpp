@@ -7,11 +7,13 @@
 #include "src/class/Balls.hpp"
 #include "src/class/Blocks.hpp"
 #include "src/class/Gifts.hpp"
+#include "src/class/Walls.hpp"
 
 Paddle* paddle = nullptr;
 Balls* balls = nullptr;
 Blocks* blocks = nullptr;
 Gifts* gifts = nullptr;
+Walls* walls = nullptr;
 EndState endState = EndState::NONE;
 bool showEndModal = false;
 
@@ -27,6 +29,7 @@ void loop() {
         paddle->handleInput();
         paddle->checkCollisions(balls);
         blocks->checkCollisions(balls, gifts);
+        walls->checkCollisions(balls);
         gifts->checkCollisions(paddle, balls);
 
         if (blocks->isEmpty()) {
@@ -55,12 +58,12 @@ void loop() {
             if (mousePos.x >= buttonX && mousePos.x <= buttonX + buttonWidth &&
                 mousePos.y >= buttonY && mousePos.y <= buttonY + buttonHeight) {
                     
-                // Cerrar modal y reiniciar juego
                 showEndModal = false;
                 balls->reset();
                 paddle->reset();
                 blocks->reset();
                 gifts->reset();
+                walls->reset();
                 endState = EndState::NONE;
             }
         }
@@ -71,6 +74,7 @@ void loop() {
 
     balls->show();
     blocks->show();
+    walls->show();
     paddle->show();
     gifts->show();
 
@@ -88,14 +92,16 @@ void loop() {
 int main() {
     InitWindow(Consts::WINDOW_WIDTH, Consts::WINDOW_HEIGHT, "Minimal Breakout");
 
-    balls = new Balls();
     paddle = new Paddle();
-    blocks = new Blocks(5, 10);
     gifts = new Gifts();
+    balls = new Balls();
+    walls = new Walls(2, 25);
+    blocks = new Blocks(5, 10);
     
-    balls->reset();
     paddle->reset();
+    balls->reset();
     blocks->reset();
+    walls->reset();
 
     emscripten_set_main_loop(loop, 0, 1);
     return 0;

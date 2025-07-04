@@ -106,7 +106,7 @@ private:
         blocks.clear();
         int totalW = cols * Consts::BLOCK_W + (cols - 1) * Consts::BLOCK_GAP;
         int offsetX = (Consts::WINDOW_WIDTH - totalW) / 2;
-        int offsetY = 60;
+        int offsetY = Consts::BLOCK_START_Y;
         
         for (int row = 0; row < rows; ++row) {
             for (int col = 0; col < cols; ++col) {
