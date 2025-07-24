@@ -2,16 +2,12 @@
 #include <raylib.h>
 #include <string>
 #include <ctime>
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
 #include "../functions/Consts.hpp"
 #include "../functions/Utils.hpp"
 
 class ScoreManager {
 public:
     ScoreManager() {
-        highScore = loadHighScore();
         reset();
     }
     
@@ -35,13 +31,6 @@ public:
         if (!gameEnded) {
             gameTime = GetTime() - startTime;
             gameEnded = true;
-            
-            // Verificar y actualizar high score
-            int currentScore = calculateTotalScore();
-            if (currentScore > highScore) {
-                highScore = currentScore;
-                saveHighScore(highScore);
-            }
         }
     }
     
@@ -60,9 +49,6 @@ public:
         
         std::string giftsText = "Gifts: " + std::to_string(giftsCollected);
         DrawText(giftsText.c_str(), 10, 60, 20, WHITE);
-        
-        std::string highScoreText = "Mejor: " + std::to_string(highScore);
-        DrawText(highScoreText.c_str(), 10, 85, 20, GOLD);
     }
     
     void showFinalScore(bool victory) {
@@ -113,19 +99,8 @@ public:
         std::string scoreText = "Puntaje Total: " + std::to_string(totalScore);
         DrawText(scoreText.c_str(), modalX + 30, statsY + lineHeight * 3 + 10, 20, GOLD);
         
-        // High Score
-        std::string highScoreText = "Mejor Puntaje: " + std::to_string(highScore);
-        Color highScoreColor = (totalScore > highScore) ? GREEN : PURPLE;
-        DrawText(highScoreText.c_str(), modalX + 30, statsY + lineHeight * 4 + 10, 18, highScoreColor);
-        
-        // Nuevo récord
-        if (totalScore > highScore && totalScore == calculateTotalScore()) {
-            std::string newRecordText = "¡NUEVO RÉCORD!";
-            DrawText(newRecordText.c_str(), modalX + 30, statsY + lineHeight * 5 + 10, 16, RED);
-        }
-        
         // Línea separadora
-        DrawLine(modalX + 20, statsY + lineHeight * 6 + 20, modalX + modalWidth - 20, statsY + lineHeight * 6 + 20, LIGHTGRAY);
+        DrawLine(modalX + 20, statsY + lineHeight * 4 + 20, modalX + modalWidth - 20, statsY + lineHeight * 4 + 20, LIGHTGRAY);
         
         // Botón "Continuar" - Actualizar coordenadas internas
         buttonRect.width = 120;
@@ -149,7 +124,6 @@ public:
     int getGiftsCollected() const { return giftsCollected; }
     float getGameTime() const { return gameTime; }
     int getTotalScore() const { return calculateTotalScore(); }
-    int getHighScore() const { return highScore; }
     Rectangle getButtonRect() const { return buttonRect; }
     
     // Método para verificar si se hizo clic en el botón
@@ -163,7 +137,6 @@ private:
     double startTime;
     float gameTime;
     bool gameEnded;
-    int highScore;
     Rectangle buttonRect; // Coordenadas del botón "Continuar"
     
     std::string formatTime(float seconds) {
@@ -187,43 +160,5 @@ private:
         else if (gameTime < 120.0f) timeBonus = 100;
         
         return baseScore + timeBonus;
-    }
-    
-    int loadHighScore() {
-#ifdef __EMSCRIPTEN__
-        // Usar localStorage del navegador para cargar el high score
-        char* result = (char*)EM_ASM_PTR({
-            var highScore = localStorage.getItem('breakout_highscore');
-            if (highScore === null) {
-                return 0;
-            }
-            var str = highScore.toString();
-            var len = lengthBytesUTF8(str) + 1;
-            var ptr = _malloc(len);
-            stringToUTF8(str, ptr, len);
-            return ptr;
-        });
-        
-        if (result == 0) {
-            return 0;
-        }
-        
-        int score = atoi(result);
-        free(result);
-        return score;
-#else
-        // Fallback para compilación nativa (retorna 0)
-        return 0;
-#endif
-    }
-    
-    void saveHighScore(int score) {
-#ifdef __EMSCRIPTEN__
-        // Usar localStorage del navegador para guardar el high score
-        EM_ASM({
-            localStorage.setItem('breakout_highscore', $0.toString());
-        }, score);
-#endif
-        // No hacer nada en compilación nativa
     }
 };
