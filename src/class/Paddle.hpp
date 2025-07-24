@@ -34,11 +34,11 @@ public:
         if (rect.x < 0) rect.x = 0;
         if (rect.x + rect.width > Consts::WINDOW_WIDTH) rect.x = Consts::WINDOW_WIDTH - rect.width;
     }
-    void checkCollisions(Balls* ball) {
-        auto& balls = ball->getBalls();
-        for (auto& ballInstance : balls) {
+    void checkCollisions(Balls* balls) {
+        auto& originalBalls = balls->getBalls();
+        for (auto& ballInstance : originalBalls) {
             if (ballInstance.active && CheckCollisionRecs(ballInstance.rect, rect)) {
-                ball->rebound(rect, ballInstance);
+                balls->rebound(rect, ballInstance);
             }
         }
     }
@@ -47,7 +47,7 @@ public:
         if (!texturesLoaded) {
             loadTextures();
         }
-        Utils::DrawTextureNineSlice(paddleTexture, rect.x, rect.y, rect.width, rect.height, 20.0f);
+        Utils::DrawTextureThreeSlice(paddleTexture, rect.x, rect.y, rect.width, rect.height, 20.0f);
     }
     void reset() {
         defaultSize();

@@ -8,6 +8,7 @@
 #include "../enum/Types.hpp"
 #include "Balls.hpp"
 #include "Gifts.hpp"
+#include "ScoreManager.hpp"
 
 struct Block {
     Rectangle rect;
@@ -38,7 +39,7 @@ public:
         }
     }
 
-    void checkCollisions(Balls* balls, Gifts* gifts) {
+    void checkCollisions(Balls* balls, Gifts* gifts, ScoreManager* scoreManager = nullptr) {
         for (auto& ball : balls->getBalls()) {
             if (!ball.active) continue;
             
@@ -52,6 +53,11 @@ public:
                             it->rect.y + it->rect.height
                         };
                         gifts->add(pos, it->giftType);
+                    }
+                    
+                    // Notificar al ScoreManager que se destruyó un bloque
+                    if (scoreManager) {
+                        scoreManager->addBlockDestroyed();
                     }
                     
                     *it = blocks.back();

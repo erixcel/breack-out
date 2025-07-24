@@ -8,12 +8,14 @@
 #include "src/class/Blocks.hpp"
 #include "src/class/Gifts.hpp"
 #include "src/class/Walls.hpp"
+#include "src/class/ScoreManager.hpp"
 
 Paddle* paddle = nullptr;
 Balls* balls = nullptr;
 Blocks* blocks = nullptr;
 Gifts* gifts = nullptr;
 Walls* walls = nullptr;
+ScoreManager* scoreManager = nullptr;
 EndState endState = EndState::NONE;
 bool showEndModal = false;
 
@@ -24,46 +26,38 @@ void loop() {
     }
 
     if (!showEndModal) {
+        scoreManager->update();
         balls->update();
         gifts->update();
         paddle->handleInput();
         paddle->checkCollisions(balls);
-        blocks->checkCollisions(balls, gifts);
+        blocks->checkCollisions(balls, gifts, scoreManager);
         walls->checkCollisions(balls);
-        gifts->checkCollisions(paddle, balls);
+        gifts->checkCollisions(paddle, balls, scoreManager);
 
         if (blocks->isEmpty()) {
+            scoreManager->endGame();
             showEndModal = true;
             endState = EndState::VICTORY;
         }
         if (balls->isOut()) {
+            scoreManager->endGame();
             showEndModal = true;
             endState = EndState::DEFEAT;
         }
     } else {
-        // Detectar clic en el botón "Continuar" del modal
+        // Detectar clic en el botón "Continuar" usando las coordenadas dinámicas
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             Vector2 mousePos = GetMousePosition();
-            int modalWidth = 400;
-            int modalHeight = 200;
-            int modalX = (Consts::WINDOW_WIDTH - modalWidth) / 2;
-            int modalY = (Consts::WINDOW_HEIGHT - modalHeight) / 2;
             
-            int buttonWidth = 120;
-            int buttonHeight = 40;
-            int buttonX = modalX + (modalWidth - buttonWidth) / 2;
-            int buttonY = modalY + modalHeight - 60;
-            
-            // Verificar si el clic está dentro del botón
-            if (mousePos.x >= buttonX && mousePos.x <= buttonX + buttonWidth &&
-                mousePos.y >= buttonY && mousePos.y <= buttonY + buttonHeight) {
-                    
+            if (scoreManager->isButtonClicked(mousePos)) {
                 showEndModal = false;
                 balls->reset();
                 paddle->reset();
                 blocks->reset();
                 gifts->reset();
                 walls->reset();
+                scoreManager->reset();
                 endState = EndState::NONE;
             }
         }
@@ -77,13 +71,14 @@ void loop() {
     walls->show();
     paddle->show();
     gifts->show();
+    
+    // Mostrar HUD con estadísticas en tiempo real
+    if (!showEndModal) {
+        scoreManager->showGameTimeHUD();
+    }
 
     if (showEndModal) {
-        if (endState == EndState::VICTORY) {
-            Utils::showVictoryModal();
-        } else {
-            Utils::showDefeatModal();
-        }
+        scoreManager->showFinalScore(endState == EndState::VICTORY);
     }
     
     EndDrawing();
@@ -97,6 +92,7 @@ int main() {
     balls = new Balls();
     walls = new Walls(2, 25);
     blocks = new Blocks(5, 10);
+    scoreManager = new ScoreManager();
     
     paddle->reset();
     balls->reset();

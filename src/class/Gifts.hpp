@@ -10,9 +10,11 @@
 #include "../functions/Consts.hpp"
 #include "../enum/Types.hpp"
 #include "Paddle.hpp"
+#include "ScoreManager.hpp"
 
 // Forward declaration para evitar dependencias circulares
 class Balls;
+
 
 class Gifts {
 public:
@@ -60,7 +62,7 @@ public:
         }
     }
     
-    void checkCollisions(Paddle* paddle, Balls* balls) {
+    void checkCollisions(Paddle* paddle, Balls* balls, ScoreManager* scoreManager = nullptr) {
         for (auto it = gifts.begin(); it != gifts.end();) {
             if (CheckCollisionRecs(paddle->getRect(), it->rect)) {
                 if (it->type == GiftType::PADDLE_EXPAND) {
@@ -68,6 +70,12 @@ public:
                 } else if (it->type == GiftType::MULTI_BALL) {
                     addMultipleBalls(balls, 2);
                 }
+                
+                // Notificar al ScoreManager que se recolectó un gift
+                if (scoreManager) {
+                    scoreManager->addGiftCollected();
+                }
+                
                 *it = gifts.back();
                 gifts.pop_back();
             } else {

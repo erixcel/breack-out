@@ -37,7 +37,7 @@ public:
             for (const auto& wall : walls) {
                 if (CheckCollisionRecs(ball.rect, wall.rect)) {
                     balls->rebound(wall.rect, ball);
-                    break; // Solo rebota, no se rompe
+                    break;
                 }
             }
         }
@@ -66,23 +66,19 @@ private:
     void build() {
         walls.clear();
         
-        // Configuración de la grilla para las paredes usando parámetros
         const int gridCols = cols;
         const int gridRows = rows;
         const int startY = Consts::WALL_START_Y;
         
-        // Calcular el ancho total y centrar (igual que Blocks)
         int totalW = gridCols * Consts::WALL_SIZE + (gridCols - 1) * Consts::WALL_GAP;
         int offsetX = (Consts::WINDOW_WIDTH - totalW) / 2;
         
-        const int centerCol = gridCols / 2;  // Columna central para simetría
-        
-        // Generar paredes aleatoriamente de forma simétrica
+        const int centerCol = gridCols / 2;
+
         for (int row = 0; row < gridRows; ++row) {
             for (int col = 0; col <= centerCol; ++col) {
                 float random_value = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
                 
-                // Solo generar pared si el valor aleatorio es menor que la probabilidad
                 if (random_value < Consts::WALL_PROBABILITY) {
                     // Pared izquierda
                     Wall wallLeft;
@@ -110,46 +106,5 @@ private:
             }
         }
         
-        // Asegurar que haya al menos algunas paredes simétricas si la generación aleatoria no creó ninguna
-        if (walls.empty()) {
-            // Crear algunas paredes de respaldo simétricas usando la misma lógica
-            Wall wall1;
-            wall1.rect = {
-                (float)(offsetX + 5 * (Consts::WALL_SIZE + Consts::WALL_GAP)),
-                (float)Consts::WALL_START_Y,
-                (float)Consts::WALL_SIZE,
-                (float)Consts::WALL_SIZE
-            };
-            walls.push_back(wall1);
-            
-            Wall wall2;
-            wall2.rect = {
-                (float)(offsetX + (gridCols - 6) * (Consts::WALL_SIZE + Consts::WALL_GAP)),
-                (float)Consts::WALL_START_Y,
-                (float)Consts::WALL_SIZE,
-                (float)Consts::WALL_SIZE
-            };
-            walls.push_back(wall2);
-            
-            if (gridRows > 1) {
-                Wall wall3;
-                wall3.rect = {
-                    (float)(offsetX + 8 * (Consts::WALL_SIZE + Consts::WALL_GAP)),
-                    (float)(Consts::WALL_START_Y + Consts::WALL_SIZE + Consts::WALL_GAP),
-                    (float)Consts::WALL_SIZE,
-                    (float)Consts::WALL_SIZE
-                };
-                walls.push_back(wall3);
-                
-                Wall wall4;
-                wall4.rect = {
-                    (float)(offsetX + (gridCols - 9) * (Consts::WALL_SIZE + Consts::WALL_GAP)),
-                    (float)(Consts::WALL_START_Y + Consts::WALL_SIZE + Consts::WALL_GAP),
-                    (float)Consts::WALL_SIZE,
-                    (float)Consts::WALL_SIZE
-                };
-                walls.push_back(wall4);
-            }
-        }
     }
 };

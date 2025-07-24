@@ -15,7 +15,7 @@ namespace Utils
         DrawTexturePro(texture, source, dest, origin, 0.0f, tint);
     }
 
-    inline void DrawTextureNineSlice(Texture2D texture, float x, float y, float width, float height, float borderWidth, Color tint = WHITE)
+    inline void DrawTextureThreeSlice(Texture2D texture, float x, float y, float width, float height, float borderWidth, Color tint = WHITE)
     {
         float textureWidth = (float)texture.width;
         float textureHeight = (float)texture.height;
