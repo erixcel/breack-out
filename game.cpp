@@ -27,9 +27,21 @@ void loop() {
 
     if (!showEndModal) {
         scoreManager->update();
+        
+        // Manejar input del paddle
+        paddle->handleInput();
+        
+        // Actualizar posición de pelotas pegadas al paddle
+        Rectangle paddleRect = paddle->getRect();
+        balls->updateStuckBalls(paddleRect);
+        
+        // Detectar tecla espacio para lanzar pelotas pegadas
+        if (IsKeyPressed(KEY_ENTER)) {
+            balls->launchStuckBalls();
+        }
+        
         balls->update();
         gifts->update();
-        paddle->handleInput();
         paddle->checkCollisions(balls);
         blocks->checkCollisions(balls, gifts, scoreManager);
         walls->checkCollisions(balls);
@@ -46,20 +58,30 @@ void loop() {
             endState = EndState::DEFEAT;
         }
     } else {
-        // Detectar clic en el botón "Continuar" usando las coordenadas dinámicas
+        // Detectar clic en el botón "Continuar" usando las coordenadas dinámicas o tecla Enter
+        bool shouldContinue = false;
+        
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             Vector2 mousePos = GetMousePosition();
-            
             if (scoreManager->isButtonClicked(mousePos)) {
-                showEndModal = false;
-                balls->reset();
-                paddle->reset();
-                blocks->reset();
-                gifts->reset();
-                walls->reset();
-                scoreManager->reset();
-                endState = EndState::NONE;
+                shouldContinue = true;
             }
+        }
+        
+        if (IsKeyPressed(KEY_ENTER)) {
+            shouldContinue = true;
+        }
+        
+        if (shouldContinue) {
+            showEndModal = false;
+            paddle->reset();
+            Rectangle paddleRect = paddle->getRect();
+            balls->reset(paddleRect);
+            blocks->reset();
+            gifts->reset();
+            walls->reset();
+            scoreManager->reset();
+            endState = EndState::NONE;
         }
     }
 
@@ -95,7 +117,8 @@ int main() {
     scoreManager = new ScoreManager();
     
     paddle->reset();
-    balls->reset();
+    Rectangle paddleRect = paddle->getRect();
+    balls->reset(paddleRect);
     blocks->reset();
     walls->reset();
 
