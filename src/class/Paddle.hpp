@@ -2,13 +2,27 @@
 #include <raylib.h>
 #include "../functions/Consts.hpp"
 #include "../functions/Utils.hpp"
-#include "Ball.hpp"
+#include "Balls.hpp"
 
 class Paddle {
 public:
     Paddle() {
         rect.width = Consts::PADDLE_W;
         rect.height = Consts::PADDLE_H;
+        texturesLoaded = false;
+    }
+    
+    ~Paddle() {
+        if (texturesLoaded) {
+            UnloadTexture(paddleTexture);
+        }
+    }
+    
+    void loadTextures() {
+        if (!texturesLoaded) {
+            paddleTexture = LoadTexture("sprites/paddle.png");
+            texturesLoaded = true;
+        }
     }
     void center() {
         rect.x = (Consts::WINDOW_WIDTH  - rect.width) / 2;
@@ -20,14 +34,20 @@ public:
         if (rect.x < 0) rect.x = 0;
         if (rect.x + rect.width > Consts::WINDOW_WIDTH) rect.x = Consts::WINDOW_WIDTH - rect.width;
     }
-    void checkCollisions(Ball* ball) {
-        if (CheckCollisionRecs(ball->getRect(), rect)) {
-            ball->rebound(rect);
+    void checkCollisions(Balls* balls) {
+        auto& originalBalls = balls->getBalls();
+        for (auto& ballInstance : originalBalls) {
+            if (ballInstance.active && CheckCollisionRecs(ballInstance.rect, rect)) {
+                balls->rebound(rect, ballInstance);
+            }
         }
     }
     
     void show() {
-        DrawRectangleRec(rect, WHITE);
+        if (!texturesLoaded) {
+            loadTextures();
+        }
+        Utils::DrawTextureThreeSlice(paddleTexture, rect.x, rect.y, rect.width, rect.height, 20.0f);
     }
     void reset() {
         defaultSize();
@@ -50,4 +70,6 @@ public:
     }
 private:
     Rectangle rect{};
+    bool texturesLoaded;
+    Texture2D paddleTexture;
 };

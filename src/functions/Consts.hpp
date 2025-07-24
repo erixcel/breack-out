@@ -14,9 +14,16 @@ namespace Consts {
 
     constexpr int BLOCK_W = 60;
     constexpr int BLOCK_H = 20;
+    constexpr int BLOCK_START_Y = 60;
     constexpr int BLOCK_GAP = 4;
 
-    constexpr int GIFT_SIZE = 10;
+    constexpr int GIFT_SIZE = 20;
     constexpr int GIFT_SPEED = 4;
-    constexpr float GIFT_PROBABILITY = 0.2f;
+    constexpr float GIFT_PROBABILITY = 0.3f;
+
+    constexpr int WALL_SIZE = 20;
+    constexpr int WALL_START_Y = 250;
+    constexpr int WALL_MARGIN_X = 50;
+    constexpr int WALL_GAP = 5;
+    constexpr float WALL_PROBABILITY = 0.5f;
 }
